@@ -29,6 +29,7 @@ Activar APIs.
 
 Crear credenciales de servicio y descargar el json.
 
+Linkear las credenciales: ```export GOOGLE_APPLICATION_CREDENTIALS="./credentials.json"```
 
 ### Paso 01
 Recorrido por el módulo de Speech API y prueba de las capacidades.
@@ -43,8 +44,6 @@ Recorrido por el módulo y prueba de las capacidades.
 
 
 ### Paso 03
-Agregar dependencia para Cloud Storage ```npm install --save @google-cloud/storage```
-
 Implementar métodos desde archivo.
 
 Probar con un texto online.

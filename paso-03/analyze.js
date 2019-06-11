@@ -16,199 +16,103 @@
 'use strict';
 
 const Language = require('@google-cloud/language');
-const Storage = require('@google-cloud/storage');
-
-const projectId = "speech-natural-codelab";
-const keyFilename = "/Users/leonardo/Projects/speech-natural-codelab/credentials.json";
+const language = new Language.LanguageServiceClient();
 
 // [START language_sentiment_string]
-function analyzeSentimentOfText (text) {
-  // Instantiates a client
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
+async function analyzeSentimentOfText (text) {
 
   // Instantiates a Document, representing the provided text
-  const document = language.document({
-    // The document text, e.g. "Hello, world!"
-    content: text
-  });
+  const document = {
+    content: text,
+    type: 'PLAIN_TEXT'
+  };
 
-  // Detects the sentiment of the document
-  return document.detectSentiment()
-    .then((results) => {
-      const sentiment = results[0];
-console.log(results)
-      console.log(`Sentiment ${sentiment}: ${sentiment >= 0 ? 'positive' : 'negative'}.`);
-
-      return sentiment;
-    });
+  // Detects the sentiment of the text
+  const [result] = await language.analyzeSentiment({document: document});
+  const sentiment = result.documentSentiment;
+ 
+  console.log(`Text: ${text}`);
+  console.log(`Sentiment score: ${sentiment.score}`);
+  console.log(`Sentiment magnitude: ${sentiment.magnitude}`);
 }
 // [END language_sentiment_string]
 
 // [START language_sentiment_file]
-function analyzeSentimentInFile (bucketName, fileName) {
-  // Instantiates clients
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-  const storage = Storage({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
+async function analyzeSentimentInFile (bucketName, fileName) {
+  // Instantiates a Document, representing the provided file
+  const document = {
+    gcsContentUri: `gs://${bucketName}/${fileName}`,
+    type: 'PLAIN_TEXT'
+  };
 
-  // The bucket where the file resides, e.g. "my-bucket"
-  const bucket = storage.bucket(bucketName);
-  // The text file to analyze, e.g. "file.txt"
-  const file = bucket.file(fileName);
+  // Detects the sentiment of the text
+  const [result] = await language.analyzeSentiment({document: document});
+  const sentiment = result.documentSentiment;
 
-  // Instantiates a Document, representing a text file in Cloud Storage
-  const document = language.document({
-    // The GCS file
-    content: file
-  });
-
-  // Detects the sentiment of the document
-  return document.detectSentiment()
-    .then((results) => {
-      const sentiment = results[0];
-
-      console.log(`Sentiment ${sentiment}: ${sentiment >= 0 ? 'positive' : 'negative'}.`);
-
-      return sentiment;
-    });
+  console.log(`Sentiment score: ${sentiment.score}`);
+  console.log(`Sentiment magnitude: ${sentiment.magnitude}`);
 }
 // [END language_sentiment_file]
 
 // [START language_entities_string]
-function analyzeEntitiesOfText (text) {
-  // Instantiates a client
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-
+async function analyzeEntitiesOfText (text) {
+  
   // Instantiates a Document, representing the provided text
-  const document = language.document({
-    // The document text, e.g. "Hello, world!"
-    content: text
-  });
+  const document = {
+    content: text,
+    type: 'PLAIN_TEXT'
+  };
 
   // Detects entities in the document
-  return document.detectEntities()
-    .then((results) => {
-      const entities = results[0];
-
-      console.log('Entities:');
-      for (let type in entities) {
-        console.log(`${type}:`, entities[type]);
-      }
-
-      return entities;
-    });
+  const [result] = await language.analyzeEntities({document: document})
+  console.log("Entities:");
+  result.entities.forEach(e => console.log(`${e.name}: ${e.type}`))
 }
 // [END language_entities_string]
 
 // [START language_entities_file]
-function analyzeEntitiesInFile (bucketName, fileName) {
-  // Instantiates clients
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-  const storage = Storage({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-
-  // The bucket where the file resides, e.g. "my-bucket"
-  const bucket = storage.bucket(bucketName);
-  // The text file to analyze, e.g. "file.txt"
-  const file = bucket.file(fileName);
-
-  // Instantiates a Document, representing a text file in Cloud Storage
-  const document = language.document({
-    // The GCS file
-    content: file
-  });
+async function analyzeEntitiesInFile (bucketName, fileName) {
+  // Instantiates a Document, representing the provided file
+  const document = {
+    gcsContentUri: `gs://${bucketName}/${fileName}`,
+    type: 'PLAIN_TEXT'
+  };
 
   // Detects entities in the document
-  return document.detectEntities()
-    .then((results) => {
-      const entities = results[0];
-
-      console.log('Entities:');
-      for (let type in entities) {
-        console.log(`${type}:`, entities[type]);
-      }
-
-      return entities;
-    });
+  const [result] = await language.analyzeEntities({document: document})
+  console.log("Entities:");
+  result.entities.forEach(e => console.log(`${e.name}: ${e.type}`))
 }
 // [END language_entities_file]
 
 // [START language_syntax_string]
-function analyzeSyntaxOfText (text) {
-  // Instantiates a client
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
+async function analyzeSyntaxOfText (text) {
 
   // Instantiates a Document, representing the provided text
-  const document = language.document({
-    // The document text, e.g. "Hello, world!"
-    content: text
-  });
+  const document = {
+    content: text,
+    type: 'PLAIN_TEXT'
+  };
 
   // Detects syntax in the document
-  return document.detectSyntax()
-    .then((results) => {
-      const syntax = results[0];
-
-      console.log('Tags:');
-      syntax.forEach((part) => console.log(part.tag));
-
-      return syntax;
-    });
+  const [result] = await language.analyzeSyntax({document: document})
+  console.log("Parts:");
+  result.tokens.forEach(t => console.log(`${t.text.content}: ${t.partOfSpeech.tag}`))
 }
 // [END language_syntax_string]
 
 // [START language_syntax_file]
-function analyzeSyntaxInFile (bucketName, fileName) {
-  // Instantiates clients
-  const language = Language({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-  const storage = Storage({
-    projectId: projectId,
-    keyFilename: keyFilename
-  });
-
-  // The bucket where the file resides, e.g. "my-bucket"
-  const bucket = storage.bucket(bucketName);
-  // The text file to analyze, e.g. "file.txt"
-  const file = bucket.file(fileName);
-
-  // Instantiates a Document, representing a text file in Cloud Storage
-  const document = language.document({
-    // The GCS file
-    content: file
-  });
+async function analyzeSyntaxInFile (bucketName, fileName) {
+  // Instantiates a Document, representing the provided file
+  const document = {
+    gcsContentUri: `gs://${bucketName}/${fileName}`,
+    type: 'PLAIN_TEXT'
+  };
 
   // Detects syntax in the document
-  return document.detectSyntax()
-    .then((results) => {
-      const syntax = results[0];
-
-      console.log('Tags:');
-      syntax.forEach((part) => console.log(part.tag));
-
-      return syntax;
-    });
+  const [result] = await language.analyzeSyntax({document: document})
+  console.log("Parts:");
+  result.tokens.forEach(t => console.log(`${t.text.content}: ${t.partOfSpeech.tag}`))
 }
 // [END language_syntax_file]
 
