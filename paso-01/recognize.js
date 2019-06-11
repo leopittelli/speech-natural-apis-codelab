@@ -33,7 +33,7 @@ async function recognize(filename) {
   const client = new Speech.SpeechClient();
  
   // Reads a local audio file and converts it to base64
-  const file = fs.readFileSync(fileName);
+  const file = fs.readFileSync(filename);
   const audioBytes = file.toString('base64');
  
   // The audio file's encoding, sample rate in hertz, and BCP-47 language code
